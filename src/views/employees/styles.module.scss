@@ -1,0 +1,29 @@
+.Form{
+    width: 350px;
+    text-align: left;
+    margin-left: 2rem;
+    margin-right: 2rem;
+
+    @media (max-width:576px){
+        margin:0px;
+        padding-left: 15px;
+        padding-right: 15px;
+        width: 100%;
+    }
+}
+
+.NewForm{
+    @extend .Form;
+}
+.EditForm{
+    @extend .Form;
+}
+.ViewForm{
+    @extend .Form;
+    *{
+        pointer-events: none;
+    }
+    button{
+        display: none;
+    }
+}
