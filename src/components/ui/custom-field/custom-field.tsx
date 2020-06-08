@@ -16,23 +16,22 @@ interface ICustomFieldProps{
 }
 
 export const CustomField: FC<ICustomFieldProps> = (props:ICustomFieldProps) => {
-    const [value, setValue] = useState(props.value);
-    const onValueChanged= props.onValueChanged??function(){}
 
+    const onValueChanged= props.onValueChanged??function(){}
     return (
         <div>
             <FormGroup>
                 <Label for={props.id}>{props.title}&nbsp;{props.required?'*':String.Empty} </Label>
                 <Input 
-                    onInput={(e) => {
-                        props.onValueChanged(e);
+                    onChange={(e) => {
+                       onValueChanged(e);
                     }} 
                     type={props.type as any} 
                     id={props.id} 
                     required={props.required}
                     tabIndex={props.tabIndex}
                     readOnly={props.readOnly}
-                    defaultValue={value}
+                    value={props.value}
                     />
                 <FormFeedback>{props.feedBackError}</FormFeedback>
                 <FormText>{props.description}</FormText>

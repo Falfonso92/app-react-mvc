@@ -1,105 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import { All, Edit, View, New } from '../views/employees';
 import { EmployeesService } from '../services/employees';
 import { IEmployee, Employee } from '../models/employee';
+import { employeeStore } from '../store/employee-store';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
-interface IState{
-    employees: Array<IEmployee>;
-    employee: IEmployee;
-}
 
-class EmployeesController extends React.Component<any>{
-    public state: IState;
-    public _clientEmployees: EmployeesService;
-    constructor(props: any){
-        super(props)
-        this.state = {
-            employees: [],
-            employee: new Employee()
-        }
-        this._clientEmployees = new EmployeesService();
-    }
+const EmployeesController: React.FC<any> = (props:any) => {
 
-    private getEmployees = () => {
-        this._clientEmployees.getAll()
-        .then(employees => this.setState({employees}))
-        .catch(err => console.error(err));
+    const employees = useSelector<RootState,Array<IEmployee>>(employeeStore.selectEmployees);
+
+    useEffect(() => 
+        props.history.push("/employees")
+    , [employees])
+
+    const dispatch: any = useDispatch();
+    const getEmployees = () => {
+        dispatch(employeeStore.getEmployees());
     }
-    private updateEmployee = (employee:IEmployee) => {
-        this._clientEmployees.update(employee.id, employee)
-        .then(result => {
-            alert("Saved!");
-            this.props.history.push("/employees");
-        })
-        .catch(err => console.log(err));
+    const updateEmployee = (employee:IEmployee) => {
+        dispatch(employeeStore.editEmployee(employee));
     }
-    private getEmployee = (id: number) => {
-        this._clientEmployees.get(id)
-        .then(employee => {
-            this.setState({employee});
-        })
+    const getEmployee = (id: number) => {
+        dispatch(employeeStore.getEmployee(id));
     }
-    private addEmployee = (employee: IEmployee) => {
-        this._clientEmployees.add(employee)
-        .then(result => {
-            alert("Saved!");
-            this.props.history.push("/employees");
-        })
-        .catch(err => console.log(err));
+    const addEmployee = (employee: IEmployee) => {
+        dispatch(employeeStore.addEmployee(employee));
     }
-    private newEmployee = () => {
-        this.setState({employee:new Employee()});
-        this.props.history.push("/employees/new");
+    const newEmployee = () => {
+        props.history.push("/employees/new");
     }
 
-    private deleteEmployee = (employee: IEmployee) =>{
+    const deleteEmployee = (employee: IEmployee) =>{
         if(window.confirm("are you sure? this operation can't be rollback")){
-            this._clientEmployees.delete(employee.id)
-            .then(employee => this.getEmployees())
-            .catch(err => console.error(err));
+            dispatch(employeeStore.deleteEmployee(employee));
         }
     }
-    private viewEmployee = (employee: IEmployee) =>{
-        this.setState({employee});
-        this.props.history.push("/employees/view");
+    const viewEmployee = (employee: IEmployee) =>{
+        getEmployee(employee.id)
+        props.history.push("/employees/view");
     }
-    private editEmployee = (employee: IEmployee) =>{
-        this.setState({employee});
-        this.props.history.push("/employees/edit");
+    const editEmployee = (employee: IEmployee) =>{
+        getEmployee(employee.id);
+        props.history.push("/employees/edit");
     }
-
-    public render(){
-        return (
-            <div className="pl-2 pr-2">
-                <div className="text-primary text-left pl-1"><h2>Employees Admin MVC</h2></div>
-                <Switch>
-                    <Route exact path="/employees">
-                        <All 
-                            employees={this.state.employees} 
-                            getEmployees={this.getEmployees}
-                            deleteEmployee={this.deleteEmployee}
-                            viewEmployee={this.viewEmployee}
-                            editEmployee={this.editEmployee}
-                            newEmployee={this.newEmployee}
-                            ></All>
-                    </Route>
-                    <Route exact path="/employees/edit">
-                        <Edit employee={this.state.employee} getEmployee={this.getEmployee} updateEmployee={this.updateEmployee}></Edit>
-                    </Route>
-                    <Route exact path="/employees/view">
-                        <View employee={this.state.employee}></View>
-                    </Route>
-                    <Route exact path="/employees/new">
-                        <New 
-                            addEmployee={this.addEmployee}
-                            employee={this.state.employee}
-                            ></New>
-                    </Route>
-                </Switch>
-            </div>
-            
-        );
-    } 
+    return (
+        <div className="pl-2 pr-2">
+            <div className="text-primary text-left pl-1"><h2>Employees Admin MVC</h2></div>
+            <Switch>
+                <Route exact path="/employees">
+                    <All 
+                        employees={employees} 
+                        getEmployees={getEmployees}
+                        deleteEmployee={deleteEmployee}
+                        viewEmployee={viewEmployee}
+                        editEmployee={editEmployee}
+                        newEmployee={newEmployee}
+                        ></All>
+                </Route>
+                <Route exact path="/employees/edit">
+                    <Edit getEmployee={getEmployee} updateEmployee={updateEmployee}></Edit>
+                </Route>
+                <Route exact path="/employees/view">
+                    <View getEmployee={getEmployee}></View>
+                </Route>
+                <Route exact path="/employees/new">
+                    <New 
+                        addEmployee={addEmployee}
+                        ></New>
+                </Route>
+            </Switch>
+        </div>
+    );
 }
 export default withRouter(EmployeesController);
